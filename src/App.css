@@ -1,0 +1,77 @@
+/* Hero section heading */
+/* .baloo-bhai-2{
+  font-family: "Baloo Bhai 2", sans-serif;
+  font-optical-sizing: auto;
+  font-weight: 700;
+  font-style: normal;
+} */
+
+
+/* .roboto {
+  font-family: "Roboto", sans-serif;
+  font-optical-sizing: auto;
+  font-weight: weight;
+  font-style: normal;
+  font-variation-settings:
+    "wdth" 100;
+} */
+
+
+
+/* ------------------------------------------------------------------------------------------------- */
+
+
+
+
+/* Hero section heading font-family */
+
+.font-family {
+    font-family: "Google Sans Flex", "Google Sans", "Helvetica Neue", sans-serif;
+    word-spacing: 6px;
+    font-weight: 700;
+}
+
+
+
+/* ------------------------------------------------------------------------------------------------- */
+
+
+
+
+/* Hero section scrooling bar*/
+
+@keyframes hush-scroll {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+.hush-container {
+  overflow: hidden;
+  white-space: nowrap;
+  display: flex;
+  width: 100%;
+  /* background-color: gray-800 */
+}
+
+.hush-wrapper {
+  display: flex;
+  flex-shrink: 0;
+  width: max-content;
+  animation: hush-scroll 20s linear infinite;
+}
+
+.hush-content {
+  display: flex;
+  align-items: center;
+  gap: 4rem; /* Words ke darmiyan barabar gap */
+  padding-right: 4rem; /* Ye gap loop ko jorne ke liye zaroori hai */
+}
+
+
+
+
+/* ------------------------------------------------------------------------------------------------- */

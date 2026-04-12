@@ -1,0 +1,36 @@
+import React, { useEffect, useState } from 'react'
+import { Footer, Navbar } from '../../index'
+import { Outlet } from 'react-router-dom'
+import { useDispatch } from 'react-redux'
+import authservice from '../../Firebase/Auth-services'
+import { login, logout } from '../../Store/authSlice'
+
+function Layout() {
+
+    const [loading, setLoading] = useState(true)
+    const dispatch = useDispatch()
+
+    useEffect(()=>{
+        authservice.getCurrentUser(). then((userData)=>{
+            if(userData){
+                dispatch(login(userData))
+            } else {
+                dispatch(logout())
+            }
+        })
+        .finally(() => setLoading(false))
+    }, [])
+
+
+    return !loading ? (
+        <div>
+            <Navbar />
+            <main>
+                <Outlet/>
+            </main>
+            <Footer />
+        </div>
+    ) : null
+}
+
+export default Layout
