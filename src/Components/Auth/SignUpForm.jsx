@@ -5,10 +5,12 @@ import { useDispatch } from 'react-redux'
 import { useForm } from 'react-hook-form'
 import authservice from '../../Firebase/Auth-services'
 import { login } from '../../Store/authSlice'
+import { toast } from 'sonner'
 
 function SignUpForm() {
 
   const [error, setError] = useState("")
+  const [isLoading, setIsLoading] = useState(false)
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { register, handleSubmit, formState: { errors } } = useForm()
@@ -17,6 +19,7 @@ function SignUpForm() {
 
     try {
       setError("")
+      setIsLoading(true)
       let session = await authservice.createAccount(data)
 
 
@@ -24,13 +27,20 @@ function SignUpForm() {
         let userData = await authservice.getCurrentUser()
 
         if (userData) {
-          dispatch(login(userData))
+
+          const fullUserData = {...userData, role: "user"}
+          dispatch(login(fullUserData))
+          toast.success("signup sucessfully")
           navigate("/")
         }
       }
 
     } catch (error) {
+      toast.error(error.message)
       setError(error.message)
+
+    } finally {
+      setIsLoading(false)
     }
   }
 
@@ -50,14 +60,14 @@ function SignUpForm() {
             type="name"
             placeholder="First Name"
             className=" "
-            {...register("first name", { required: true })}
+            {...register("firstname", { required: true })}
           />
 
           <Input
             type="name"
             placeholder="Last Name"
             className=" "
-            {...register("last name", { required: true })}
+            {...register("lastname", { required: true })}
           />
 
           <Input
@@ -87,7 +97,7 @@ function SignUpForm() {
             className='bg-black text-white w-full text-lg transition-all duration-150 
             active:scale-97 '
           >
-            Submit
+            {isLoading ? "Signing Up..." : "Submit"}
           </Button>
         </form>
 

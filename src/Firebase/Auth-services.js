@@ -1,4 +1,5 @@
-import { auth } from "../lib/fireBaseConfig";
+import { doc, getDoc, setDoc } from "firebase/firestore";
+import { auth, database } from "../lib/fireBaseConfig";
 import {
     createUserWithEmailAndPassword,
     signInWithEmailAndPassword,
@@ -24,6 +25,15 @@ export class AuthServices {
                     displayName: `${firstname} ${lastname}`
                 })
 
+
+                await setDoc(doc(database, "users", user.uid), {
+                    firstname,
+                    lastname,
+                    email,
+                    role: "user",
+                    createdAt: new Date().toISOString()
+                })
+
                 return await this.login({ email, password })
 
             }
@@ -35,6 +45,28 @@ export class AuthServices {
             throw error;
         }
     }
+    
+
+    async getUserRole(uid) {
+        try {
+            const docRef = doc(database, "users", uid);
+            const docSnap = await getDoc(docRef);
+            if (docSnap.exists()) {
+                return docSnap.data().role; // Yeh "admin" ya "user" return karega
+            }
+            return "user"; 
+            
+        } catch (error) {
+
+            console.log(error);
+            return "user";
+            
+        }
+    }
+
+
+
+
 
     async login({ email, password }) {
         try {
