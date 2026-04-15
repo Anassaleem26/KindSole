@@ -1,64 +1,47 @@
-import { storage } from "../lib/fireBaseConfig";
-import { ref, uploadBytes, getDownloadURL, deleteObject } from "firebase/storage"
+import firebaseConfig from "../lib/fireBaseConfig"
 
 export class StorageService {
+
     constructor() {
-        this.storage = storage;
-        this.bestFolder = "product-images";
+        this.cloudName = firebaseConfig.cloudinaryCloudName;
+        this.uploadPreset = firebaseConfig.cloudinaryPresetName
     }
 
-
-    async uploadFile(file) {
-
-        if (file) return null
-
+    async uplaodFile(file) {
         try {
+            const formData = new FormData()
+            formData.append("file", file)
+            formData.append("upload_preset", this.uploadPreset);
 
-            const fileName = `${Date.now()}-${file.name}`
-            const fileRef = ref(this.storage, `${this.bestFolder}/${fileName}`);
+            const uploadURL = `https://api.cloudinary.com/v1_1/${this.cloudName}/image/upload`;
 
-            const loadFile = await uploadBytes(fileRef, file)
-            const fileUrl = await getDownloadURL(loadFile.ref)
+            const responce = await fetch(uploadURL, {
+                method: 'POST',
+                body: formData
+            })
 
-            return {
-                url: fileUrl,
-                fileName: fileName
+            if (!responce.ok) {
+                throw new Error("Cloudinary upload failed");
             }
-        } catch (error) {
-            console.error("StorageService :: uploadFile :: error", error);
-            throw error;
-        }
 
-    }
+            const data = await responce.json()
 
-
-    async deleteFile(fileName) {
-        if (fileName) return false
-        try {
-            const fileRef = ref(this.storage, `${this.bestFolder}/${fileName}`);
-            await deleteObject(fileRef);
-            return true
+            return data
 
         } catch (error) {
-            console.error("StorageService :: deleteFile :: error", error);
-            throw error;
+            console.log("Cloudinary service :: uploadFile :: error", error);
+            return false;
         }
     }
 
 
-    async updateFile(oldFileName, newFile) {
-        try {
-            if (oldFileName) {
-                await this.deleteFile(oldFileName)
-            }
-            return await this.uploadFile(newFile)
-
-        } catch (error) {
-            console.error("StorageService :: updateFile :: error", error);
-            throw error;
-        }
+    async deleteFile(publicId) {
+        if (!publicId) return false;
+        // console.log("Manual Cleanup Required for Public ID:", publicId);
+        return true;
     }
+
 }
 
-const storageservice = new StorageService();
+const storageservice = new StorageService()
 export default storageservice

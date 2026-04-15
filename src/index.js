@@ -3,7 +3,7 @@ import Footer from "./Components/Layout/Footer";
 import AutoScroll from "./Components/Home/AutoScroll";
 import Hero from "./Components/Home/Hero";
 import Card from "./Components/ui/Card";
-import DayCollections from "./Components/Home/DayCollections";
+import DayCollections from "./Components/Home/NewArrivals";
 import SignUpForm from "./Components/Auth/SignUpForm"; 
 import LoginForm from "./Components/Auth/LoginForm";
 import Signup from "./Pages/Signup";

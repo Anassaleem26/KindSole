@@ -22,7 +22,7 @@ const data = [
     },
 ]
 
-function DayCollections() {
+function NewArrivals() {
   return (
     <div className='container mx-auto grid grid-cols-3 gap-4'>
         {data.map((item) => (
@@ -35,4 +35,4 @@ function DayCollections() {
   )
 }
 
-export default DayCollections
+export default NewArrivals
