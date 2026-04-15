@@ -10,15 +10,23 @@ function Layout() {
     const [loading, setLoading] = useState(true)
     const dispatch = useDispatch()
 
-    useEffect(()=>{
-        authservice.getCurrentUser(). then((userData)=>{
-            if(userData){
-                dispatch(login(userData))
+    useEffect(() => {
+        authservice.getCurrentUser().then((userData) => {
+            if (userData) {
+
+                const cleanUserData = {
+                    uid: userData.uid,
+                    email: userData.email,
+                    displayName: userData.displayName,
+                    photoURL: userData.photoURL
+                };
+                dispatch(login(cleanUserData));
+
             } else {
                 dispatch(logout())
             }
         })
-        .finally(() => setLoading(false))
+            .finally(() => setLoading(false))
     }, [])
 
 
@@ -26,7 +34,7 @@ function Layout() {
         <div>
             <Navbar />
             <main>
-                <Outlet/>
+                <Outlet />
             </main>
             <Footer />
         </div>
