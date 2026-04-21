@@ -5,7 +5,7 @@ import { useDispatch } from 'react-redux'
 import authservice from '../../Firebase/Auth-services'
 import { login, logout } from '../../Store/authSlice'
 
-function Layout() {
+function UserLayout() {
 
     const [loading, setLoading] = useState(true)
     const dispatch = useDispatch()
@@ -41,4 +41,4 @@ function Layout() {
     ) : null
 }
 
-export default Layout
+export default UserLayout

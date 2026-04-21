@@ -35,7 +35,7 @@ function LoginForm() {
 
           if (role === "admin") {
             toast.success("Wellcome Admin!")
-            navigate("admin-dashboard")
+            navigate("/admin-dashboard")
           } else {
             toast.success("Login sucessfully")
             navigate("/")
@@ -49,7 +49,7 @@ function LoginForm() {
       console.log("login error", error);
 
     } finally {
-      setIsLoading (false)
+      setIsLoading(false)
     }
   }
 

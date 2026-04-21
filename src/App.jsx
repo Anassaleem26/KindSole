@@ -1,14 +1,21 @@
 
 import { createBrowserRouter } from 'react-router-dom';
 import './App.css';
-import { Layout, Signup, Login } from './index.js';
+import { UserLayout, Signup, Login, AdminLayout } from './index.js';
 import Home from './Pages/Home.jsx';
+// import Admin from './Pages/Admin.jsx';
+import AddProduct from './Admin/AdminPage.jsx/AddProduct.jsx';
+import AdminDashboard from './Admin/AdminPage.jsx/AdminDashboard.jsx';
+import AllProducts from './Admin/AllProducts.jsx';
+
 
 let router = createBrowserRouter([
 
+  // User panel routing
+
   {
     path: "/",
-    element: <Layout />,
+    element: <UserLayout />,
     children: [
       {
         path: "/",
@@ -22,8 +29,32 @@ let router = createBrowserRouter([
         path: "/Login",
         element: <Login />
       },
+
+
     ]
-  }
+  },
+
+
+
+// Admin panel routing
+  {
+    path: "/admin-dashboard",
+    element: <AdminLayout />,
+    children: [
+      {
+         path: "/admin-dashboard",
+        element: <AdminDashboard />
+      },
+      {
+         path: "add-products",
+        element: <AddProduct />
+      },
+      {
+         path: "products",
+        element: <AllProducts />
+      },
+    ]
+  },
 
 ])
 

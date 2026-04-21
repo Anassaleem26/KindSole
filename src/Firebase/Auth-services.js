@@ -24,8 +24,6 @@ export class AuthServices {
                 await updateProfile(user, {
                     displayName: `${firstname} ${lastname}`
                 })
-
-
                 await setDoc(doc(database, "users", user.uid), {
                     firstname,
                     lastname,
@@ -33,9 +31,7 @@ export class AuthServices {
                     role: "user",
                     createdAt: new Date().toISOString()
                 })
-
                 return await this.login({ email, password })
-
             }
 
             return user;
@@ -52,7 +48,7 @@ export class AuthServices {
             const docRef = doc(database, "users", uid);
             const docSnap = await getDoc(docRef);
             if (docSnap.exists()) {
-                return docSnap.data().role; // Yeh "admin" ya "user" return karega
+                return docSnap.data().role; 
             }
             return "user"; 
             
