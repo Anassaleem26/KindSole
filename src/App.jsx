@@ -7,7 +7,12 @@ import Home from './Pages/Home.jsx';
 import AddProduct from './Admin/AdminPage.jsx/AddProduct.jsx';
 import AdminDashboard from './Admin/AdminPage.jsx/AdminDashboard.jsx';
 import AllProducts from './Admin/AllProducts.jsx';
-
+import EditProduct from './Admin/AdminPage.jsx/EditProduct.jsx';
+import MenSectionPage from './Pages/MenSectionPage.jsx';
+import WomenSectionPage from './Pages/WomenSectionPage.jsx';
+import SaleSectionPage from './Pages/SaleSectionPage.jsx';
+import MenSalePage from './Pages/MenSalePage.jsx';
+import WomenSalePage from './Pages/WomenSalePage.jsx';
 
 let router = createBrowserRouter([
 
@@ -21,6 +26,34 @@ let router = createBrowserRouter([
         path: "/",
         element: <Home />
       },
+      
+      {
+        path: "/mensection",
+        element: <MenSectionPage />
+      },
+      
+      {
+        path: "/womensection",
+        element: <WomenSectionPage />
+      },
+      
+      {
+        path: "/salesection",
+        element: <SaleSectionPage />
+      },
+      
+      {
+        path: "/salesection/mensale",
+        element: <MenSalePage />
+      },
+      
+      
+      {
+        path: "/salesection/women",
+        element: <WomenSalePage />
+      },
+      
+
       {
         path: "/Signup",
         element: <Signup />
@@ -52,6 +85,10 @@ let router = createBrowserRouter([
       {
          path: "products",
         element: <AllProducts />
+      },
+      {
+         path: "EditProduct/:id",
+        element: <EditProduct />
       },
     ]
   },

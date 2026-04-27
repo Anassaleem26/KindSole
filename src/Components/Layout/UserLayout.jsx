@@ -11,14 +11,17 @@ function UserLayout() {
     const dispatch = useDispatch()
 
     useEffect(() => {
-        authservice.getCurrentUser().then((userData) => {
+        authservice.getCurrentUser().then(async (userData) => {
             if (userData) {
+
+                const userRole = await authservice.getUserRole(userData.uid)
 
                 const cleanUserData = {
                     uid: userData.uid,
                     email: userData.email,
                     displayName: userData.displayName,
-                    photoURL: userData.photoURL
+                    photoURL: userData.photoURL,
+                    role: userRole,
                 };
                 dispatch(login(cleanUserData));
 
@@ -30,15 +33,19 @@ function UserLayout() {
     }, [])
 
 
-    return !loading ? (
-        <div>
-            <Navbar />
-            <main>
-                <Outlet />
-            </main>
-            <Footer />
+    return loading ?
+        <div className='container mx-auto py-19 text-center'>
+            Loading.....
         </div>
-    ) : null
+        : (
+            <div>
+                <Navbar />
+                <main>
+                    <Outlet />
+                </main>
+                <Footer />
+            </div>
+        )
 }
 
 export default UserLayout

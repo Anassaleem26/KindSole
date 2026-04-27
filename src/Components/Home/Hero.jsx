@@ -1,5 +1,6 @@
 import React from 'react';
 import bgImage from '../../assets/Bg image/pexels-tima-miroshnichenko-7202768.webp';
+import { Link } from 'react-router-dom';
 
 const Hero = () => {
 
@@ -29,12 +30,17 @@ const Hero = () => {
             </h3>
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center text-white">
-              <button className="btn btn-primary w-full sm:w-auto px-7 transition-all hover:scale-105 bg-gray-800 h-10 rounded-[20px] text-[17px] opacity-90">
-                Shop Men
-              </button>
-              <button className="btn btn-primary w-full sm:w-auto px-7 transition-all hover:scale-105 bg-gray-800 h-10 rounded-[20px] text-[17px] opacity-90">
-                Shop Women
-              </button>
+              <Link to="/mensection">
+                <button className="btn btn-primary w-full sm:w-auto px-7 transition-all hover:scale-105 bg-gray-800 h-10 rounded-[20px] text-[17px] opacity-90">
+                  Shop Men
+                </button>
+              </Link>
+
+              <Link to="/womensection">
+                <button className="btn btn-primary w-full sm:w-auto px-7 transition-all hover:scale-105 bg-gray-800 h-10 rounded-[20px] text-[17px] opacity-90">
+                  Shop Women
+                </button>
+              </Link>
             </div>
           </div>
         </div>
@@ -42,7 +48,7 @@ const Hero = () => {
 
 
 
-     
+
     </section>
   );
 };

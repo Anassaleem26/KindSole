@@ -3,7 +3,7 @@ import AllProducts from '../AllProducts'
 
 function Products() {
   return (
-    <div>Products</div>
+    <div>AllProducts</div>
   )
 }
 

@@ -1,13 +1,13 @@
-import React, { useEffect, useState } from 'react'
+import React, { useState } from 'react'
 import Input from '../Components/ui/Input'
 import { useNavigate } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import configservice from '../Firebase/Config-services'
 import storageservice from '../Firebase/Storage-services'
+import { toast } from 'sonner'
 
 function AddProduct({ product }) {
-
-    const { register, handleSubmit, reset, setValue, formState: { errors } } = useForm({
+    const { register, handleSubmit, formState: { errors } } = useForm({
         defaultValues: {
             productName: product?.productName || "",
             category: product?.category || "",
@@ -17,306 +17,212 @@ function AddProduct({ product }) {
     })
 
     const navigate = useNavigate();
-    const [loading, setLoading] = useState(false)
-    const [error, setError] = useState("")
-
-    const [imageFiles, setImageFiles] = useState([])
-    const [existingImage, setExistingImage] = useState([])
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState(null)
 
 
+    const [variants, setVariants] = useState(product?.variants || [{ color: '', imageFile: null, existingUrl: '' }]);
 
-    // ---------------------------------------------------------------------------------------------------
-    // Color handle 
-
-    const [addColorPopup, setAddColorPopup] = useState(false)
-    const [colors, setColors] = useState([])
-    const [colorInput, setColorInput] = useState("")
-
-
-    const handleColor = () => {
-        if (colorInput.trim() === "") return;
-
-        setColors([...colors, colorInput])
-        setColorInput("");
-        setAddColorPopup(false);
+    const addVariantRow = () => {
+        setVariants([...variants, { color: '', imageFile: null, existingUrl: '' }]);
     };
-    const removeColor = (indexToRemove) => {
-        const updateColor = colors.filter((_, index) => index !== indexToRemove)
-        setColors(updateColor)
-    }
 
 
 
-    // ---------------------------------------------------------------------------------------------------
-    // Handle Sizes
+    // variant color
+    const updateVariant = (index, field, value) => {
+        const newVariants = [...variants];
+        newVariants[index][field] = value;
+        setVariants(newVariants);
+    };
 
+
+
+    // Remove complete variant 
+    const removeVariant = (index) => {
+        if (variants.length > 0) {
+            setVariants(variants.filter((_, i) => i !== index));
+        }
+    };
+
+    // --- Size Logic (Unchanged but kept clean) ---
     const avaliableSizes = [6, 7, 8, 9, 10, 11, 12, 13, 14];
-    const [seletedSizes, setSelectedSizes] = useState([]);
+    const [selectedSizes, setSelectedSizes] = useState(product?.size || []);
 
     const handleSizeChange = (size) => {
-        const updatedSizes = seletedSizes.includes(size)
-            ? seletedSizes.filter((s) => s !== size)
-            : [...seletedSizes, size];
-
+        const updatedSizes = selectedSizes.includes(size)
+            ? selectedSizes.filter((s) => s !== size)
+            : [...selectedSizes, size];
         setSelectedSizes(updatedSizes);
-
-        const valueToStore = updatedSizes.length > 0 ? updatedSizes : "";
-        setValue("size", valueToStore, { shouldValidate: true });
     };
 
-
-    // ---------------------------------------------------------------------------------------------------
-
-    useEffect(() => {
-        if (product && product.productId) {
-
-            reset({
-                productName: product.productName,
-                category: product.category,
-                regularPrice: product.regularPrice,
-                discountPrice: product.discountPrice
-            });
-
-            setColors(product.colors || []);
-            setSelectedSizes(product.size || []);
-            setExistingImage(product.images || [])
-        }
-    }, [product?.productId, reset])
-
-
-
-    // ---------------------------------------------------------------------------------------------------
-
-
-
+    // --- Submit Logic ---
     const submit = async (data) => {
-
         try {
-            console.log(data);
-            setError("")
             setLoading(true);
-            let finalImageUrls = [...existingImage];
+            setError("")
+            const finalVariants = [];
 
-            if (imageFiles.length > 0) {
-                const uploadedUrls = await storageservice.uplaodFile(imageFiles)
-                if (uploadedUrls) {
-                    finalImageUrls = [...finalImageUrls, ...uploadedUrls]
+            for (const variant of variants) {
+                let imageUrl = variant.existingUrl;
+
+                // New image file  upload 
+                if (variant.imageFile) {
+                    const uploadedUrls = await storageservice.uplaodFile([variant.imageFile]);
+                    imageUrl = uploadedUrls[0];
+                }
+
+                if (variant.color && imageUrl) {
+                    finalVariants.push({ color: variant.color, imageUrl });
                 }
             }
+
             const finalProductData = {
                 ...data,
-                colors,
-                size: seletedSizes,
-                images: finalImageUrls,
+                variants: finalVariants, // Ab colors aur images variants ke andar hain
+                size: selectedSizes,
                 updatedAt: new Date().toISOString()
-            }
+            };
 
             if (product?.productId) {
-                await configservice.updateProduct(product.productId, finalProductData)
-                alert("update products sucessfully")
-
+                await configservice.updateProduct(product.productId, finalProductData);
+                toast.success("Product updated successfully!");
             } else {
-                await configservice.addProduct(finalProductData)
-                alert("product added sucessfully")
+                await configservice.addProduct(finalProductData);
+                toast.success("Product added successfully!");
             }
 
-            navigate("/admin-dashboard/products")
-
+            navigate("/admin-dashboard/products");
         } catch (error) {
             console.error("Submit Error:", error);
-            alert("Something went wrong!");
+            toast.error("Something went wrong!");
         } finally {
             setLoading(false);
         }
     }
 
-    // ---------------------------------------------------------------------------------------------------
-
-
     return (
-        <div>
-            <div className='pb-7'>
-                <h1 className='text-3xl font-medium'>Add Product</h1>
-            </div>
+        <div className="p-4">
+            <h1 className='text-3xl font-medium mb-7'>Add Product</h1>
 
-            <form
-                onSubmit={handleSubmit(submit)}
-                className='bg-white p-9 rounded-xl'
-            >
-
-                <div className='flex gap-8 bg-white p-9 rounded-xl' >
+            <form onSubmit={handleSubmit(submit)} className='bg-white p-9 rounded-xl flex flex-col gap-8 shadow-sm'>
+                <div className='flex gap-8'>
 
                     {error && <p className="text-red-600 mt-8 text-center"> {error} </p>}
 
+                    <div className='w-1/2 space-y-4'>
+                        <Input
+                            label="Product Name"
+                            placeholder="Product name"
+                            {...register("productName", { required: true })}
+                        />
+                        {errors.productName?.message && <p className="text-red-600 mt-8 text-center"> {errors.productName.message} </p>}
 
-                    {/* Product Name  */}
+                        <div className="flex flex-col">
+                            <label className="mb-1 text-sm">Category</label>
+                            <select
+                                {...register("category", { required: true })}
+                                className="h-10 border border-gray-300 rounded px-2 bg-white outline-none">
+                                <option value="man">Man</option>
+                                <option value="woman">Woman</option>
+                            </select>
+                            {errors.category?.message && <p className="text-red-600 mt-8 text-center"> {errors.category.message} </p>}
+                        </div>
 
-                    <div className='w-1/2'>
-                        <div className='w-full bg-white'>
-                            <Input
-                                label="Product Name"
-                                placeholder="Product name"
-                                labelClassName="pb-[-3] text-sm"
-                                type='text'
-                                className="h-8.75 w-100 flex flex-col ml-1"
-                                {...register("productName", { required: true })}
-                            />
+                        <div className='p-5 border rounded-lg bg-[#f4f4f4] space-y-4'>
+                            <h3 className='font-medium text-lg text-black'>Pricing</h3>
+                            <div className='flex gap-5 text-black'>
+                                <Input
+                                    label="Regular Price ($)"
+                                    type='number'
+                                    {...register("regularPrice", { required: true })}
+                                />
+                                {errors.regularPrice && <p className="text-red-600 mt-8 text-center"> {errors.regularPrice.message} </p>}
 
-                            {errors.productName && <p className="text-red-600 mt-8 text-center"> {errors.productName.message} </p>}
-
-                            <div className="flex flex-col ml-1 w-100 mb-9">
-                                <label className="mb-1 text-sm">Category</label>
-
-                                <select
-                                    {...register("category", { required: true })}
-                                    className="h-8.75 w-100 border border-gray-300 rounded px-2 bg-white outline-none">
-                                    <option value="" disabled hidden>Select Category</option>
-                                    <option value="man">Man</option>
-                                    <option value="woman">Woman</option>
-                                </select>
-                                {errors.category && (
-                                    <p className="text-red-600 text-xs mt-1">{errors.category.message}</p>
-                                )}
-                            </div>
-
-
-                            {/* Pricing */}
-
-                            <div className='w-100 p-5 border border-gray-100 rounded-lg bg-[#f4f4f4]'>
-                                <h3 className='pb-5 font-medium text-lg'>Pricing</h3>
-                                <div className='flex gap-5'>
-                                    <Input
-                                        label="Regular Price ($)"
-                                        labelClassName="text-sm"
-                                        type='number'
-                                        className="h-7.5"
-                                        {...register("regularPrice", { required: true })}
-                                    />
-                                    {errors.regularPrice && <p className="text-red-600 mt-8 text-center"> {errors.regularPrice.message} </p>}
-
-                                    <Input
-                                        label="Discount Price ($)"
-                                        labelClassName="text-sm"
-                                        type='number'
-                                        className="h-7.5"
-                                    />
-                                </div>
+                                <Input
+                                    label="Discount Price ($)"
+                                    type='number'
+                                    {...register("discountPrice")}
+                                />
+                                {errors.discountPrice?.message && <p className="text-red-600 mt-8 text-center"> {errors.discountPrice.message} </p>}
                             </div>
                         </div>
                     </div>
 
-                    <div className='w-1/2'>
-                        <div className="flex flex-col ml-1 w-100">
-                            <label className="mb-1 text-sm">Colors</label>
-                            <div className="h-8.75 flex items-center gap-2 flex-wrap border border-gray-300 pl-2 rounded-lg">
-                                {colors.map((color, index) => (
-                                    <div key={index} className="relative group">
 
-                                        <span
-                                            className="w-6 h-6 rounded border block"
-                                            style={{ backgroundColor: color }}
-                                            title={color}
 
+
+
+
+
+                    {/* Sizes Section */}
+                    <div className='w-1/2 space-y-6'>
+
+                        <div className='pt-2'>
+                            <h3 className="text-md mb-2 font-medium text-black">Sizes</h3>
+                            <div className="flex flex-wrap gap-2 text-black">
+                                {avaliableSizes.map((size) => (
+                                    <div
+                                        key={size}
+                                        onClick={() => handleSizeChange(size)}
+                                        className={`w-9 h-9 flex items-center justify-center border rounded cursor-pointer transition-all ${selectedSizes.includes(size) ? "bg-black text-white" : "bg-white text-black hover:border-black"
+                                            }`}
+                                    >
+                                        {size}
+                                    </div>
+                                ))}
+                            </div>
+                            {errors.sizes?.message && <p className="text-red-600 mt-8 text-center"> {errors.sizes.message} </p>}
+                        </div>
+
+
+
+                        {/* Right Side: Variants (Color + Image) */}
+
+                        <div className='pt-5'>
+                            <div className='flex justify-between items-center mb-3 text-black'>
+                                <label className="text-sm font-medium">Product Variants (Colors & Images)</label>
+                                <button type="button" onClick={addVariantRow} className="text-xs bg-black text-white px-2 py-1 rounded">+ Add Variant</button>
+                            </div>
+
+                            <div className='space-y-3'>
+                                {variants.map((v, index) => (
+                                    <div key={index} className="flex gap-2 items-center bg-gray-50 p-3 rounded-lg border relative">
+                                        {/* Color Dropdown/Input */}
+                                        <input
+                                            type="text"
+                                            placeholder="Color (e.g. Red)"
+                                            className="w-1/3 border p-1 text-sm rounded bg-white text-black outline-none"
+                                            value={v.color}
+                                            onChange={(e) => updateVariant(index, 'color', e.target.value)}
+                                            {...register("color", { required: true })}
                                         />
+                                        {errors.color?.message && <p className="text-red-600 mt-8 text-center"> {errors.color.message} </p>}
 
-                                        <button
-                                            type='button'
-                                            onClick={() => removeColor(index)}
-                                            className="absolute -top-1 -right-1 bg-black text-white text-[13px] w-3 h-3 flex items-center justify-center rounded-full opacity-0 group-hover:opacity-100"
-                                        >
-                                            ×
-                                        </button>
+                                        {/* Image Upload for this specific color */}
+                                        <div className="flex-1 flex items-center gap-2">
+                                            <label className="cursor-pointer bg-white border px-2 py-1 text-xs rounded hover:bg-gray-100 text-black">
+                                                {v.imageFile ? "Image Selected" : (v.existingUrl ? "Change Image" : "Upload Image")}
+                                                <input
+                                                    type="file"
+                                                    className="hidden"
+                                                    onChange={(e) => updateVariant(index, 'imageFile', e.target.files[0])}
+                                                    {...register("file", { required: true })}
+                                                />
+                                                {errors.file?.message && <p className="text-red-600 mt-8 text-center"> {errors.file.message} </p>}
+                                            </label>
 
-                                    </div>
-                                ))}
-                                <button
-                                    type="button"
-                                    onClick={() => setAddColorPopup(true)}
-                                    className="w-6 h-6 flex items-center justify-center border rounded text-lg cursor-pointer"
-                                >
-                                    +
-                                </button>
-                            </div>
-                        </div>
-
-                        {addColorPopup && (
-                            <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-                                <div className="bg-white p-4 rounded w-80 shadow-xl">
-                                    <h2 className="text-lg mb-3 font-medium">Add Color</h2>
-                                    <input
-                                        type="text"
-                                        autoFocus
-                                        value={colorInput}
-                                        onChange={(e) => setColorInput(e.target.value)}
-                                        placeholder="Enter color (red, #ff0000)"
-                                        className="border w-full p-2 mb-3 outline-none rounded"
-                                    />
-                                    <div className="flex justify-end gap-2">
-                                        <button
-                                            type="button"
-                                            onClick={() => setAddColorPopup(false)}
-                                            className="px-4 py-1.5 text-sm hover:bg-gray-100 rounded transition"
-                                        >
-                                            Cancel
-                                        </button>
-                                        <button
-                                            type="button"
-                                            onClick={handleColor}
-                                            className="bg-black text-white px-4 py-1.5 text-sm rounded shadow hover:bg-gray-800 transition"
-                                        >
-                                            Add
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        )}
-
-                        <div className='pt-8 pb-8'>
-                            <h3 className="text-sm mb-2 font-medium">Size</h3>
-                            <div className="flex flex-wrap gap-2">
-                                {avaliableSizes.map((size) => {
-                                    const isSelected = seletedSizes.includes(size);
-                                    return (
-                                        <div
-                                            key={size}
-                                            onClick={() => handleSizeChange(size)}
-                                            className={`w-8 h-8 flex items-center justify-center border rounded cursor-pointer transition-all duration-200 select-none ${isSelected
-                                                ? "bg-black text-white border-black scale-105"
-                                                : "bg-white text-black hover:border-black"} `}
-                                        // {...register("size", { required: true })}
-                                        >
-                                            {size}
+                                            {(v.imageFile || v.existingUrl) && (
+                                                <img
+                                                    src={v.imageFile ? URL.createObjectURL(v.imageFile) : v.existingUrl}
+                                                    className="w-8 h-8 rounded object-cover"
+                                                />
+                                            )}
                                         </div>
-                                    );
-                                })}
-                            </div>
-                            {errors.size && (
-                                <p className="text-red-600 text-xs mt-2 font-medium">
-                                    {errors.size.message}
-                                </p>
-                            )}
-                        </div>
 
-
-                        <div>
-                            <label className="text-sm font-medium">Images</label>
-                            <div className="grid grid-cols-4 gap-2 mt-2">
-
-                                {[...existingImage, ...Array.from(imageFiles).map(f => URL.createObjectURL(f))].map((img, i) => (
-                                    <img key={i} src={img} className="w-full h-16 object-cover rounded-lg border" />
+                                        <button type="button" onClick={() => removeVariant(index)} className="text-red-500 font-bold px-2 text-black">×</button>
+                                    </div>
                                 ))}
-                                <label className="w-full h-16 border-2 border-dashed rounded-lg flex items-center justify-center cursor-pointer hover:bg-gray-50">
-                                    <span className="text-xl">+</span>
-                                    <input
-                                        type="file"
-                                        multiple
-                                        className="hidden"
-                                        onChange={(e) => {
-                                            const files = Array.from(e.target.files);
-                                            setImageFiles((prev) => [...prev, ...files]);
-                                        }}
-                                        accept="image/*" />
-                                </label>
                             </div>
                         </div>
 
@@ -324,19 +230,11 @@ function AddProduct({ product }) {
                     </div>
                 </div>
 
-                <div className='flex gap-4 justify-end mt-4'>
-                    <button
-                        type="button"
-                        className='px-6 py-2.5 border border-gray-200 rounded-lg cursor-pointer transition active:scale-95 duration-200 hover:bg-gray-50'
-                    >
-                        Cancel
-                    </button>
-                    <button
-                        type="submit"
-                        className='bg-black text-white px-8 py-2.5 rounded-lg cursor-pointer transition active:scale-95 duration-200 shadow-lg hover:bg-gray-800'
-                    >
-                        {/* {loading ? "Uploading..." : (product ? "Update Product..." : "Publish Product")} */}
-                        {loading ? "Uploading..." : "Publish Product"}
+                {/* Footer Buttons */}
+                <div className='flex gap-4 justify-end border-t pt-6'>
+                    <button type="button" onClick={() => navigate(-1)} className='px-6 py-2 border rounded-lg text-black'>Cancel</button>
+                    <button type="submit" disabled={loading} className='bg-black text-white px-8 py-2 rounded-lg shadow-lg hover:bg-gray-800 disabled:bg-gray-500'>
+                        {loading ? "Processing..." : (product ? "Update Product" : "Publish Product")}
                     </button>
                 </div>
             </form>

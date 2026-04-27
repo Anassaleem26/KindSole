@@ -1,12 +1,16 @@
 import React from 'react'
-import { AutoScroll, Hero, DayCollections } from '../index'
+import { AutoScroll, Hero, NewArrivals, MenHeroContainer, WomenHeroContainer, Videos, CardSection } from '../index'
 
 function Home() {
     return (
         <>
             <Hero/>
             <AutoScroll />
-            <DayCollections />
+            <NewArrivals />
+            <MenHeroContainer />
+            <WomenHeroContainer/>
+            <Videos />
+            <CardSection/>
         </>
     )
 }

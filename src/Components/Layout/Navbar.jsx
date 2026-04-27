@@ -1,8 +1,18 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { Icon } from '@iconify/react';
+import { useSelector } from 'react-redux';
+// import authservice from '../../Firebase/Auth-services';
+// import { auth } from '../../lib/fireBaseConfig';
+// import { useQuery } from '@tanstack/react-query';
+
 
 const Navbar = () => {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+
+    const { status, userData } = useSelector((state) => state.auth)
+    const role = userData?.role
 
     return (
         <nav className="z-50 w-full flex items-center justify-between px-4 md:px-8 py-4 border-b border-gray-200 bg-white shadow-md fixed top-0 left-0 ">
@@ -25,14 +35,14 @@ const Navbar = () => {
             `}>
                 <li>
                     <Link
-                        to="/men"
+                        to="/mensection"
                         onClick={() => setIsMenuOpen(false)}
                         className="text-lg md:text-sm font-bold uppercase tracking-widest hover:underline decoration-2 underline-offset-8"
                     >Men</Link>
                 </li>
                 <li>
                     <Link
-                        to="/women"
+                        to="/womensection"
                         onClick={() => setIsMenuOpen(false)}
                         className="text-lg md:text-sm font-bold uppercase tracking-widest hover:underline decoration-2 underline-offset-8"
                     >Women</Link>
@@ -40,7 +50,7 @@ const Navbar = () => {
                 <li>
                     <Link
                         onClick={() => setIsMenuOpen(false)}
-                        to="/sale"
+                        to="/salesection"
                         className="text-lg md:text-sm font-bold uppercase tracking-widest text-red-600 hover:underline decoration-2 underline-offset-8"
                     >Sale</Link>
                 </li>
@@ -57,10 +67,29 @@ const Navbar = () => {
             {/* 3. Right Side: Utilities & Icons */}
             <div className="flex items-center space-x-3 md:space-x-5 text-gray-700 z-30">
 
+
                 <Link
                     to="/about"
                     className="hidden lg:block hover:text-black text-sm font-medium"
-                >About</Link>
+                >
+                    About
+                </Link>
+
+
+                {/* Admin Panel Icon  */}
+
+                {status && role === "admin" && (
+                    <Link
+                        to="/admin-dashboard"
+                        className="hidden lg:block hover:text-black text-sm font-medium"
+                    >
+                        <Icon
+                            icon="material-symbols:admin-panel-settings-outline"
+                            className="size-6 transition-transform duration-200 border rounded-full"
+                        />
+                    </Link>
+                )}
+
 
                 {/* Search Toggle */}
                 <Link
@@ -93,7 +122,7 @@ const Navbar = () => {
 
                 {/* Shopping Cart Icon */}
                 <Link
-                to="/cart"
+                    to="/cart"
                     className="flex items-center cursor-pointer hover:text-black"
                 >
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">

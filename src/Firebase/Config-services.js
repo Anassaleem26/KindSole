@@ -111,7 +111,7 @@ export class ConfigServices {
             const q = query(
                 collection(this.database, this.collectionName),
                 orderBy("createdAt", "desc"),
-                limit(10)
+                limit(8)
             )
             const products = await getDocs(q)
             return products.docs.map(doc => ({ id: doc.id, ...doc.data() }))

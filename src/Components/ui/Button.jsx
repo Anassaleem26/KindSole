@@ -1,8 +1,10 @@
 import React from 'react'
+import { twMerge } from 'tailwind-merge'
+import clsx from 'clsx'
 
 function Button({
     children,
-    type = "Button",
+    type = "button",
     bgcolor = "",
     textcolor = "",
     className = "",
@@ -10,7 +12,7 @@ function Button({
 }) {
     return (
         <button
-            className={`px-4 py-2 rounded-lg ${bgcolor} ${textcolor} ${className}`}
+            className={twMerge(clsx(`px-4 py-2 rounded-lg ${bgcolor} ${textcolor} ${className}`))}
             type={type}
             {...props}
         >
