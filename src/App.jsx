@@ -13,6 +13,7 @@ import WomenSectionPage from './Pages/WomenSectionPage.jsx';
 import SaleSectionPage from './Pages/SaleSectionPage.jsx';
 import MenSalePage from './Pages/MenSalePage.jsx';
 import WomenSalePage from './Pages/WomenSalePage.jsx';
+import SearchPage from './Pages/SearchPage.jsx';
 
 let router = createBrowserRouter([
 
@@ -61,6 +62,10 @@ let router = createBrowserRouter([
       {
         path: "/Login",
         element: <Login />
+      },
+      {
+        path: "/search",
+        element: <SearchPage />
       },
 
 

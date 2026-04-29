@@ -73,13 +73,15 @@ function AddProduct({ product }) {
                 }
 
                 if (variant.color && imageUrl) {
-                    finalVariants.push({ color: variant.color, imageUrl });
+                    finalVariants.push({ color: variant.color.toLowerCase(), imageUrl });
                 }
             }
 
             const finalProductData = {
                 ...data,
-                variants: finalVariants, // Ab colors aur images variants ke andar hain
+                productName: data.productName.toLowerCase(),
+                category: data.category.toLowerCase(),
+                variants: finalVariants, // Ab colors aur images finalvariants ke andar hain
                 size: selectedSizes,
                 updatedAt: new Date().toISOString()
             };
@@ -188,18 +190,22 @@ function AddProduct({ product }) {
                             <div className='space-y-3'>
                                 {variants.map((v, index) => (
                                     <div key={index} className="flex gap-2 items-center bg-gray-50 p-3 rounded-lg border relative">
+
                                         {/* Color Dropdown/Input */}
+
                                         <input
                                             type="text"
                                             placeholder="Color (e.g. Red)"
                                             className="w-1/3 border p-1 text-sm rounded bg-white text-black outline-none"
                                             value={v.color}
                                             onChange={(e) => updateVariant(index, 'color', e.target.value)}
-                                            {...register("color", { required: true })}
+                                            // {...register("color", { required: true })}
                                         />
+
                                         {errors.color?.message && <p className="text-red-600 mt-8 text-center"> {errors.color.message} </p>}
 
                                         {/* Image Upload for this specific color */}
+                                        
                                         <div className="flex-1 flex items-center gap-2">
                                             <label className="cursor-pointer bg-white border px-2 py-1 text-xs rounded hover:bg-gray-100 text-black">
                                                 {v.imageFile ? "Image Selected" : (v.existingUrl ? "Change Image" : "Upload Image")}
@@ -207,7 +213,7 @@ function AddProduct({ product }) {
                                                     type="file"
                                                     className="hidden"
                                                     onChange={(e) => updateVariant(index, 'imageFile', e.target.files[0])}
-                                                    {...register("file", { required: true })}
+                                                    // {...register("file", { required: true })}
                                                 />
                                                 {errors.file?.message && <p className="text-red-600 mt-8 text-center"> {errors.file.message} </p>}
                                             </label>
