@@ -14,6 +14,7 @@ import SaleSectionPage from './Pages/SaleSectionPage.jsx';
 import MenSalePage from './Pages/MenSalePage.jsx';
 import WomenSalePage from './Pages/WomenSalePage.jsx';
 import SearchPage from './Pages/SearchPage.jsx';
+import ProductDetailView from './Pages/ProductDetailView.jsx';
 
 let router = createBrowserRouter([
 
@@ -28,6 +29,15 @@ let router = createBrowserRouter([
         element: <Home />
       },
       
+      {
+        path: "/Signup",
+        element: <Signup />
+      },
+      {
+        path: "/Login",
+        element: <Login />
+      },
+
       {
         path: "/mensection",
         element: <MenSectionPage />
@@ -56,16 +66,13 @@ let router = createBrowserRouter([
       
 
       {
-        path: "/Signup",
-        element: <Signup />
-      },
-      {
-        path: "/Login",
-        element: <Login />
-      },
-      {
         path: "/search",
         element: <SearchPage />
+      },
+
+      {
+        path: "/product/:productId",
+        element: <ProductDetailView />
       },
 
 

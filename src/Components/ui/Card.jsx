@@ -1,13 +1,20 @@
 import { forwardRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 const Card = forwardRef(function Card({ data, className = "", classNameImg = "" }, ref) {
 
+    const navigate = useNavigate()
     const [userSelectedVariant, setUserSelectedVariant] = useState(null);
 
     const currentVariant = userSelectedVariant || data?.variants?.[0];
 
+    const handleNavigate = () => {
+        navigate(`/product/${data.id || data.productId}`);
+    }
+
     return (
         <div
+            onClick={handleNavigate}
             ref={ref}
             className={`group w-80 bg-white overflow-hidden transition-all duration-300 p-3 shadow-lg hover:shadow-md rounded-xl ${className}`}
         >
@@ -45,7 +52,7 @@ const Card = forwardRef(function Card({ data, className = "", classNameImg = "" 
                             </p>
                         </>
                     ) : (
-                        <p className="text-sm text-gray-400">
+                        <p className="text-sm text-black font-bold">
                             ${data?.regularPrice}
                         </p>
                     )}

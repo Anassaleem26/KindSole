@@ -4,6 +4,7 @@ import { Outlet } from 'react-router-dom'
 import { useDispatch } from 'react-redux'
 import authservice from '../../Firebase/Auth-services'
 import { login, logout } from '../../Store/authSlice'
+import { Icon } from '@iconify/react';
 
 function UserLayout() {
 
@@ -34,9 +35,12 @@ function UserLayout() {
 
 
     return loading ?
-        <div className='container mx-auto py-19 text-center'>
-            Loading.....
-        </div>
+       <div className="flex h-screen w-full items-center justify-center">
+        <Icon
+            icon="svg-spinners:blocks-shuffle-3"
+            className="text-gray-700 size-12" // Increased size slightly for better visibility
+        />
+    </div>
         : (
             <div>
                 <Navbar />
