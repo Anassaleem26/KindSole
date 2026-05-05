@@ -17,7 +17,6 @@ function WomenHeroContainer() {
             try {
                 setLoading(true)
                 const products = await configservice.getProductByCategory("woman")
-                console.log(products);
                 if (products) setProducts(products)
 
 

@@ -2,20 +2,30 @@ import React, { useEffect, useState } from 'react'
 import { Icon } from '@iconify/react';
 import { useParams } from 'react-router-dom';
 import configservice from '../Firebase/Config-services';
+import { useCart } from '../Context/CartContext';
+import { toast } from 'sonner';
 
 function ProductDetailView() {
 
+
+    // Product adding cart
+    const { addToCart } = useCart();
+
+    // --------------------------------------------------------------------------------------------------
+
+
+
     const { productId } = useParams()
     const [product, setProduct] = useState(null)
-    const [selectSize, setSelectedSize] = useState(null)
+    const [selectSize, setSelectSize] = useState(null)
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState(null)
 
-    // -------------------------------------------------------------------------------------------------------------
+    // ----------------------------------------------------------------------------------------------
 
 
     // Click the color change the img
-    const [userSelectedVariant, setUserSelectedVariant] = useState(product?.variants?.[0])
+    const [userSelectedVariant, setUserSelectedVariant] = useState(null)
 
     const currentVariant = userSelectedVariant || product?.variants?.[0]
 
@@ -30,6 +40,10 @@ function ProductDetailView() {
                 const data = await configservice.getProduct(productId);
                 setProduct(data)
 
+                if (data?.variants?.length > 0) {
+                    setUserSelectedVariant(data.variants[0]);
+                }
+
             } catch (error) {
                 console.error("API Error:", error);
             } finally {
@@ -38,6 +52,7 @@ function ProductDetailView() {
         })()
     }, [productId])
 
+
     const handleAddToCart = (e) => {
         e.preventDefault();
 
@@ -45,6 +60,18 @@ function ProductDetailView() {
             setError("Please select a size to continue.")
             return;
         }
+
+        const productWithSize = {
+            ...product,
+            size: selectSize,
+            color: currentVariant.color,
+            imageUrl: currentVariant.imageUrl,
+            finalPrice: product.discountPrice > 0 ? product.discountPrice : product.regularPrice,
+            cartId: `${product.productId}-${selectSize}-${currentVariant.color}`
+        };
+
+        addToCart(productWithSize)
+        toast.success(`${product.productName} added to cart!`);
 
     }
 
@@ -157,7 +184,7 @@ function ProductDetailView() {
                                         <div
                                             key={item}
                                             onClick={() => {
-                                                setSelectedSize(item)
+                                                setSelectSize(item)
                                                 setError("")
                                             }}
                                             className={`w-9 h-9 flex items-center justify-center border rounded cursor-pointer transition-all

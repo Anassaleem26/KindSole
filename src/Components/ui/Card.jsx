@@ -1,29 +1,33 @@
 import { forwardRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
+
 const Card = forwardRef(function Card({ data, className = "", classNameImg = "" }, ref) {
+
 
     const navigate = useNavigate()
     const [userSelectedVariant, setUserSelectedVariant] = useState(null);
-
     const currentVariant = userSelectedVariant || data?.variants?.[0];
 
     const handleNavigate = () => {
         navigate(`/product/${data.id || data.productId}`);
     }
 
+   
+
     return (
         <div
-            onClick={handleNavigate}
             ref={ref}
             className={`group w-80 bg-white overflow-hidden transition-all duration-300 p-3 shadow-lg hover:shadow-md rounded-xl ${className}`}
         >
+
             {/* Image Section */}
             <div className="relative aspect-square overflow-hidden border border-gray-200 rounded-lg">
                 <img
                     src={currentVariant?.imageUrl || "https://via.placeholder.com/300"}
                     alt={data?.productName}
                     className={`w-full h-full object-cover transition-all duration-500 ${classNameImg}`}
+                    onClick={handleNavigate}
                 />
             </div>
 

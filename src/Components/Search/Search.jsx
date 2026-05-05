@@ -57,10 +57,7 @@ function Search() {
             return productName.includes(term) || category === term || color
 
         })
-        // console.log(searchResult);
         setSearchedProducts(searchResult)
-
-        console.log(searchResult);
 
     }, [searchTerm, allProducts])
 

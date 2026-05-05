@@ -15,6 +15,8 @@ import MenSalePage from './Pages/MenSalePage.jsx';
 import WomenSalePage from './Pages/WomenSalePage.jsx';
 import SearchPage from './Pages/SearchPage.jsx';
 import ProductDetailView from './Pages/ProductDetailView.jsx';
+import CheckOut from './Pages/CheckOut.jsx'
+
 
 let router = createBrowserRouter([
 
@@ -73,6 +75,11 @@ let router = createBrowserRouter([
       {
         path: "/product/:productId",
         element: <ProductDetailView />
+      },
+
+      {
+        path: "/checkout",
+        element: <CheckOut />
       },
 
 

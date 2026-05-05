@@ -18,7 +18,6 @@ function MenHeroContainer() {
             try {
                 setLoading(true)
                 const products = await configservice.getProductByCategory("man")
-                console.log(products);
                 if (products) setProducts(products)
 
 

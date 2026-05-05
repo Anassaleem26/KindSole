@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from 'react'
-import { Footer, Navbar } from '../../index'
+import { Footer } from '../../index'
 import { Outlet } from 'react-router-dom'
 import { useDispatch } from 'react-redux'
 import authservice from '../../Firebase/Auth-services'
 import { login, logout } from '../../Store/authSlice'
 import { Icon } from '@iconify/react';
+import LinkNavbarCartDrawer from '../Cart/LinkNavbar&CartDrawer'
 
 function UserLayout() {
 
@@ -43,7 +44,7 @@ function UserLayout() {
     </div>
         : (
             <div>
-                <Navbar />
+                <LinkNavbarCartDrawer />
                 <main>
                     <Outlet />
                 </main>

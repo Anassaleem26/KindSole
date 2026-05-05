@@ -16,8 +16,11 @@ const Input = forwardRef(function Input({
     <div className='w-full'>
       {label && <label
         htmlFor={id}
+
         className={twMerge(clsx(`inline-block mb-1 pl-1 pb-2 text-md ${labelClassName}`))}
+        
       > {label}</label>}
+
       <input
         type={type}
         ref={ref}

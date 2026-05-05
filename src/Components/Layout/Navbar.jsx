@@ -2,17 +2,17 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Icon } from '@iconify/react';
 import { useSelector } from 'react-redux';
-// import authservice from '../../Firebase/Auth-services';
-// import { auth } from '../../lib/fireBaseConfig';
-// import { useQuery } from '@tanstack/react-query';
+import { useCart } from '../../Context/CartContext';
 
 
-const Navbar = () => {
+const Navbar = ({ onCartClick }) => {
+    const { cartCount } = useCart();
+
     const [isMenuOpen, setIsMenuOpen] = useState(false);
-
 
     const { status, userData } = useSelector((state) => state.auth)
     const role = userData?.role
+
 
     return (
         <nav className="z-50 w-full flex items-center justify-between px-4 md:px-8 py-4 border-b border-gray-200 bg-white shadow-md fixed top-0 left-0 ">
@@ -121,15 +121,15 @@ const Navbar = () => {
                 </Link>
 
                 {/* Shopping Cart Icon */}
-                <Link
-                    to="/cart"
+                <div
+                    onClick={onCartClick}
                     className="flex items-center cursor-pointer hover:text-black"
                 >
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
                     </svg>
-                    <span className="ml-1 text-sm font-bold">0</span>
-                </Link>
+                    <span className="ml-1 text-sm font-bold">{cartCount}</span>
+                </div>
 
                 {/* Mobile Menu Toggle (Hamburger) */}
                 <button
