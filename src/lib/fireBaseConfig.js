@@ -20,6 +20,11 @@ export const firebaseConfig = {
   // Cloudinary config
   cloudinaryCloudName: String(import.meta.env.VITE_CLOUDINARY_CLOUD_NAME),
   cloudinaryPresetName: String(import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET_NAME),
+
+
+
+  //Strip using payment method handle
+  stripePublicKey:  String(import.meta.env.VITE_STRIPE_PUBLIC_KEY),
 };
 
 // Initialize Firebase

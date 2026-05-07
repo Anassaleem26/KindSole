@@ -1,5 +1,5 @@
 import { database } from "../lib/fireBaseConfig";
-import { doc, getDoc, getDocs, setDoc, collection, deleteDoc, updateDoc, query, where, orderBy, limit } from "firebase/firestore"
+import { doc, getDoc, getDocs, setDoc, collection, addDoc, serverTimestamp, deleteDoc, updateDoc, query, where, orderBy, limit } from "firebase/firestore"
 
 
 export class ConfigServices {
@@ -105,7 +105,7 @@ export class ConfigServices {
     }
 
 
-    
+
     async getNewArrivals() {
         try {
             const q = query(
@@ -136,7 +136,7 @@ export class ConfigServices {
             throw error;
         }
     }
-    
+
 
 
 
@@ -148,6 +148,22 @@ export class ConfigServices {
 
         } catch (error) {
             console.error("Config-Service :: updateStock :: error", error);
+            throw error;
+        }
+    }
+
+
+    async saveOrderToDB(orderData) {
+        try {
+            const orderRef = collection(this.database, "orders")
+            const docRef = await addDoc(orderRef, {
+                ...orderData,
+                createdAt: serverTimestamp()
+            })
+            return docRef.id
+
+        } catch (error) {
+            console.error("Config-Service :: saveOrderToDB :: error", error);
             throw error;
         }
     }

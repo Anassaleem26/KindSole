@@ -170,7 +170,7 @@ const CartDrawer = ({ isOpen, setIsOpen }) => {
           <div className="p-6 border-t border-gray-100 bg-gray-50/50">
             <div className="flex justify-between items-center mb-4">
               <span className="font-medium text-lg">Subtotal: </span>
-              <span className="text-xl font-bold text-gray-900 italic">$ {calculateTotal()}</span>
+              <span className="text-xl font-bold text-gray-900 ">$ {calculateTotal().toFixed(2)}</span>
             </div>
 
             <p className="text-[10px] text-gray-500 text-center mb-4 uppercase tracking-widest">
@@ -179,7 +179,7 @@ const CartDrawer = ({ isOpen, setIsOpen }) => {
 
             <Link
               to="/checkout"
-              className="w-full bg-[#212a2f] hover:bg-black text-white py-4 rounded-xl font-bold uppercase tracking-[0.2em] text-xs transition-all active:scale-[0.98] shadow-lg"
+              className="w-full flex items-center justify-center bg-[#212a2f] hover:bg-black text-white py-4 rounded-xl font-bold uppercase tracking-[0.2em] text-xs transition-all active:scale-[0.98] shadow-lg"
             >
               Proceed to Checkout
             </Link>

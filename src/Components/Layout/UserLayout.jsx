@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { Footer } from '../../index'
-import { Outlet } from 'react-router-dom'
+import { Outlet, useLocation } from 'react-router-dom'
 import { useDispatch } from 'react-redux'
 import authservice from '../../Firebase/Auth-services'
 import { login, logout } from '../../Store/authSlice'
@@ -8,6 +8,12 @@ import { Icon } from '@iconify/react';
 import LinkNavbarCartDrawer from '../Cart/LinkNavbar&CartDrawer'
 
 function UserLayout() {
+
+    const location = useLocation();
+
+    const hiddenPaths = ["/checkout", "/order-success"];
+    const hideLayout = hiddenPaths.includes(location.pathname);// using this cannot show the nav, footer in checkout page
+
 
     const [loading, setLoading] = useState(true)
     const dispatch = useDispatch()
@@ -36,19 +42,19 @@ function UserLayout() {
 
 
     return loading ?
-       <div className="flex h-screen w-full items-center justify-center">
-        <Icon
-            icon="svg-spinners:blocks-shuffle-3"
-            className="text-gray-700 size-12" // Increased size slightly for better visibility
-        />
-    </div>
+        <div className="flex h-screen w-full items-center justify-center">
+            <Icon
+                icon="svg-spinners:blocks-shuffle-3"
+                className="text-gray-700 size-12" // Increased size slightly for better visibility
+            />
+        </div>
         : (
             <div>
-                <LinkNavbarCartDrawer />
+                {!hideLayout && <LinkNavbarCartDrawer />}
                 <main>
                     <Outlet />
                 </main>
-                <Footer />
+                {!hideLayout && <Footer />}
             </div>
         )
 }

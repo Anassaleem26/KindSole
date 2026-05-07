@@ -26,12 +26,12 @@ function ProductDetailView() {
 
     // Click the color change the img
     const [userSelectedVariant, setUserSelectedVariant] = useState(null)
-
     const currentVariant = userSelectedVariant || product?.variants?.[0]
-
+    
     // -------------------------------------------------------------------------------------------------------------
-
-
+    
+    
+    
     useEffect(() => {
         (async () => {
             try {
@@ -39,7 +39,7 @@ function ProductDetailView() {
                 setError(null)
                 const data = await configservice.getProduct(productId);
                 setProduct(data)
-
+                
                 if (data?.variants?.length > 0) {
                     setUserSelectedVariant(data.variants[0]);
                 }
@@ -51,7 +51,20 @@ function ProductDetailView() {
             }
         })()
     }, [productId])
+    
 
+    if (loading) {
+        return (
+            <div className="h-screen flex items-center justify-center">
+                <Icon icon="svg-spinners:ring-resize" className="size-10" />
+            </div>
+        );
+    }
+    
+
+    if (!product) return null;
+    
+    const { variants: _variants, ...restOfProduct } = product;  // product state sy variants k alwa baki data da do
 
     const handleAddToCart = (e) => {
         e.preventDefault();
@@ -62,7 +75,7 @@ function ProductDetailView() {
         }
 
         const productWithSize = {
-            ...product,
+            ...restOfProduct,
             size: selectSize,
             color: currentVariant.color,
             imageUrl: currentVariant.imageUrl,
@@ -75,12 +88,6 @@ function ProductDetailView() {
 
     }
 
-    if (loading) {
-        return (
-            <div className="h-screen flex items-center justify-center">
-                <Icon icon="svg-spinners:ring-resize" className="size-10" />
-            </div>);
-    }
 
     return (
         <div className="bg-gray-50 min-h-screen pt-17 pb-10 px-8 gap-6">
