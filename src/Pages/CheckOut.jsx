@@ -9,13 +9,14 @@ import { Icon } from '@iconify/react';
 import authservice from '../Firebase/Auth-services';
 import { CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
 import { toast } from 'sonner';
+import { sendOrderEmail } from '../Components/Email Services/emailService';
 
 function CheckOut() {
 
 
     // Stripe hooks -----------------------------------------------------------------------------------
 
-    const stripe = useStripe();   
+    const stripe = useStripe();
     const elements = useElements();
 
     // ------------------------------------------------------------------------------------------------
@@ -51,23 +52,35 @@ function CheckOut() {
 
             }
 
+            let orderId = null;
+            let finalOrderData = null;
+
+            // if (selectedMethod === "cod") {
+            //     const orderId = await configservice.saveOrderToDB(orderData)
+
+            //     if (orderId) {
+
+            //         clearCart()    // Empty cart when order is successfull
+            //         toast.success("Order Placed via COD!");
+            //         navigate('/order-success', {
+            //             state: { orderId: orderId },
+            //             replace: true // Taake user back button daba kar wapis checkout par na aa sakay
+            //         });
+            //         console.log(orderId)
+            //     }
+
             if (selectedMethod === "cod") {
-                const orderId = await configservice.saveOrderToDB(orderData)
-
-                if (orderId) {
-
-                    clearCart()    // Empty cart when order is successfull
-                    toast.success("Order Placed via COD!");
-                    navigate('/order-success', {
-                        state: { orderId: orderId },
-                        replace: true // Taake user back button daba kar wapis checkout par na aa sakay
-                    });
-                }
+                finalOrderData = {
+                    ...orderData,
+                    paymentMethod: "Cash on delivery",
+                    paymentStatus: "Unpaid"
+                };
+                orderId = await configservice.saveOrderToDB(finalOrderData);
 
             } else {
 
                 // 2. Stripe Logic
-                
+
                 if (!stripe || !elements) {
                     toast.error("Stripe is loading... please wait.");
                     setLoading(false);
@@ -89,28 +102,42 @@ function CheckOut() {
                     toast.error(error.message);
                     setLoading(false);
 
+                    // } else {
+                    //     const stripeOrderData = {
+                    //         ...orderData,
+                    //         paymentMethod: "Card (Stripe)",
+                    //         paymentStatus: "Pending Verification", // Testing ke liye 'Paid' ya 'Pending Verification'
+                    //         stripePaymentId: stripeMethod.id, // Ye ID record ke liye zaroori hai
+                    //     };
+
                 } else {
-                    const stripeOrderData = {
+                    finalOrderData = {
                         ...orderData,
                         paymentMethod: "Card (Stripe)",
-                        paymentStatus: "Pending Verification", // Testing ke liye 'Paid' ya 'Pending Verification'
-                        stripePaymentId: stripeMethod.id, // Ye ID record ke liye zaroori hai
+                        paymentStatus: "Paid",
+                        stripePaymentId: stripeMethod.id,
                     };
-
-
-                    // 4. Firebase mein save karein
-                    const orderId = await configservice.saveOrderToDB(stripeOrderData);
-
-                    if (orderId) {
-                        clearCart();
-                        toast.success("Payment Successful & Order Placed!");
-                        navigate('/order-success', {
-                            state: { orderId: orderId },
-                            replace: true
-                        });
-                    }
+                    orderId = await configservice.saveOrderToDB(finalOrderData);
                 }
             }
+
+
+
+
+            // 4. Firebase mein save karein
+            // const orderId = await configservice.saveOrderToDB(stripeOrderData);
+
+            if (orderId) {
+                sendOrderEmail(finalOrderData, orderId);
+                clearCart();
+                toast.success(selectedMethod === "cod" ? "Order Placed via COD!" : "Payment Successful & Order Placed!");
+                navigate('/order-success', {
+                    state: { orderId: orderId },
+                    replace: true
+                });
+            }
+
+
 
         } catch (error) {
             console.error("CheckOut :: handleSubmit :: error", error);

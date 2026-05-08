@@ -6,7 +6,7 @@ import { getStorage } from "firebase/storage";
 
 export const firebaseConfig = {
 
-    // Firebase config
+  // Firebase config
   apiKey: String(import.meta.env.VITE_FIREBASE_API_KEY),
   authDomain: String(import.meta.env.VITE_FIREBASE_AUTH_DOMAIN),
   projectId: String(import.meta.env.VITE_FIREBASE_PROJECT_ID),
@@ -24,7 +24,15 @@ export const firebaseConfig = {
 
 
   //Strip using payment method handle
-  stripePublicKey:  String(import.meta.env.VITE_STRIPE_PUBLIC_KEY),
+  stripePublicKey: String(import.meta.env.VITE_STRIPE_PUBLIC_KEY),
+
+
+
+  //EmailJs service id
+  emailJsServiceId: String(import.meta.env.VITE_EMAILJS_SERVICE_ID),
+  emailJsTemplateId: String(import.meta.env.VITE_EMAILJS_TEMPLATE_ID),
+  emailJsPublicKey: String(import.meta.env.VITE_EMAILJS_PUBLIC_KEY),
+
 };
 
 // Initialize Firebase
