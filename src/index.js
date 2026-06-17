@@ -23,6 +23,7 @@ import MenSale from "./Components/Sections/SaleSection/MenSale";
 import WomenSale from "./Components/Sections/SaleSection/WomenSale";
 import Search from "./Components/Search/Search";
 import CartDrawer from "./Components/Cart/CartDrawer";
+import Help from "./Components/Help/Help";
 
 export{
     Navbar, 
@@ -50,4 +51,5 @@ export{
     WomenSale,
     Search,
     CartDrawer,
+    Help,
 }

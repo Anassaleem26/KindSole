@@ -18,6 +18,7 @@ import ProductDetailView from './Pages/ProductDetailView.jsx';
 import CheckOut from './Pages/CheckOut.jsx'
 import OrderSuccess from './Pages/OrderSuccess.jsx';
 import Account from './Components/Account/Account.jsx';
+import HelpPage from './Pages/HelpPage.jsx';
 
 import { loadStripe } from '@stripe/stripe-js';
 import { Elements } from '@stripe/react-stripe-js';
@@ -103,6 +104,10 @@ let router = createBrowserRouter([
       {
         path: "/account",
         element: <Account />
+      },
+      {
+        path: "/help",
+        element: <HelpPage />
       },
 
 
