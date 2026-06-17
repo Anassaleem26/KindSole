@@ -114,7 +114,7 @@ const Help = () => {
                     <p className="text-gray-500 max-w-lg mx-auto mb-8 text-sm md:text-base">
                         Drop us a message and our support team will handle your query directly.
                     </p>
-                    <button className="bg-black text-white px-8 py-3.5 rounded-lg font-medium hover:bg-gray-800 transition-colors tracking-wide shadow-md">
+                    <button className="bg-gray-800 text-white px-8 py-3.5 rounded-lg font-medium hover:bg-gray-700 transition-colors tracking-wide shadow-md">
                         Contact Support
                     </button>
                 </div>

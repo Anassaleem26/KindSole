@@ -19,6 +19,7 @@ import CheckOut from './Pages/CheckOut.jsx'
 import OrderSuccess from './Pages/OrderSuccess.jsx';
 import Account from './Components/Account/Account.jsx';
 import HelpPage from './Pages/HelpPage.jsx';
+import AboutPage from './Pages/AboutPage.jsx';
 
 import { loadStripe } from '@stripe/stripe-js';
 import { Elements } from '@stripe/react-stripe-js';
@@ -108,6 +109,10 @@ let router = createBrowserRouter([
       {
         path: "/help",
         element: <HelpPage />
+      },
+      {
+        path: "/about",
+        element: <AboutPage />
       },
 
 
