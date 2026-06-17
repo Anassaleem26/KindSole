@@ -6,9 +6,12 @@ import { useForm } from 'react-hook-form';
 import authservice from '../../Firebase/Auth-services';
 import { login as sliceLogin } from '../../Store/authSlice';
 import { toast } from 'sonner';
+import { useCart } from '../../Context/CartContext';
+import configservice from '../../Firebase/Config-services';
 
 function LoginForm() {
 
+  const { cartItems, clearCart } = useCart()
   const navigate = useNavigate();
   const dispatch = useDispatch()
   const { register, handleSubmit, formState: { errors } } = useForm()
@@ -23,6 +26,9 @@ function LoginForm() {
 
       let session = await authservice.login(data)
       if (session) {
+
+        await configservice.transferCartItemToBackend(session, cartItems)
+        clearCart()
 
         let userData = await authservice.getCurrentUser();
 
@@ -43,9 +49,12 @@ function LoginForm() {
         }
       }
     } catch (error) {
-
-      toast.error(error.message)
-      setError(error)
+      if (error.message.includes("auth/invalid-credential")) {
+        setError("Invalid credential")
+        
+      } else {
+        setError(error.message)
+      }
       console.log("login error", error);
 
     } finally {

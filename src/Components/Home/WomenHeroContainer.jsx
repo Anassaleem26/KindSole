@@ -3,6 +3,7 @@ import WomenSectionBg from '../../../src/assets/woamn section bg-img/87654.png';
 import Card from '../ui/Card';
 import configservice from '../../Firebase/Config-services';
 import { Link } from 'react-router-dom';
+import { Icon } from '@iconify/react';
 
 function WomenHeroContainer() {
 
@@ -98,21 +99,38 @@ function WomenHeroContainer() {
 
 
 
-                    {loading ? "waiting" :
-                        <div
-                            ref={scrollRef}
-                            className="flex overflow-x-auto gap-4 scrollbar-hide scroll-smooth"
-                            style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
-                        >
-                            {products.map((product) => (
+                    {loading ?
+                        (<div className='flex overflow-x-auto px-10 py-10 gap-4 scrollbar-hide scroll-smooth'>
+                            {[...Array(4)].map((_, index) => (
                                 <div
-                                    key={product.id || product.productId}
-                                    className="flex-shrink-0 pb-5 w-full sm:w-[calc(50%-12px)] md:w-[calc(33.33%-12px)] lg:w-[calc(25%-12px)]"
+                                    key={index}
+                                    className="flex-shrink-0 w-full sm:w-[calc(50%-12px)] md:w-[calc(33.33%-12px)] lg:w-[calc(25%-12px)] animate-pulse"
                                 >
-                                    <Card data={product} className="w-full" />
+                                    <div className="bg-gray-200 aspect-square rounded-lg mb-4 flex items-center justify-center">
+                                        <Icon icon="svg-spinners:ring-resize" className="text-gray-300 size-8" />
+                                    </div>
+                                    <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
+                                    <div className="h-4 bg-gray-200 rounded w-1/2"></div>
                                 </div>
                             ))}
+
                         </div>
+                        ) : (
+                            <div
+                                ref={scrollRef}
+                                className="flex overflow-x-auto gap-4 scrollbar-hide scroll-smooth"
+                                style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+                            >
+                                {products.map((product) => (
+                                    <div
+                                        key={product.id || product.productId}
+                                        className="flex-shrink-0 pb-5 w-full sm:w-[calc(50%-12px)] md:w-[calc(33.33%-12px)] lg:w-[calc(25%-12px)]"
+                                    >
+                                        <Card data={product} className="w-full" />
+                                    </div>
+                                ))}
+                            </div>
+                        )
                     }
 
                     <button

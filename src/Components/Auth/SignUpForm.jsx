@@ -6,8 +6,12 @@ import { useForm } from 'react-hook-form'
 import authservice from '../../Firebase/Auth-services'
 import { login } from '../../Store/authSlice'
 import { toast } from 'sonner'
+import configservice from '../../Firebase/Config-services'
+import { useCart } from '../../Context/CartContext'
 
 function SignUpForm() {
+
+  const { cartItems, clearCart } = useCart()
 
   const [error, setError] = useState("")
   const [isLoading, setIsLoading] = useState(false)
@@ -22,13 +26,26 @@ function SignUpForm() {
       setIsLoading(true)
       let session = await authservice.createAccount(data)
 
-
       if (session) {
+
+        await configservice.transferCartItemToBackend(session, cartItems)
+        clearCart()
+
         let userData = await authservice.getCurrentUser()
 
         if (userData) {
 
-          const fullUserData = {...userData, role: "user"}
+          // const fullUserData = { ...userData, role: "user" }
+
+          const fullUserData = {
+            uid: userData.uid,
+            email: userData.email,
+            displayName: userData.displayName || "Anonymous User",
+            photoURL: userData.photoURL || null,
+            emailVerified: userData.emailVerified,
+            role: "user",
+            createdAt: userData.metadata.creationTime,
+          };
           dispatch(login(fullUserData))
           toast.success("signup sucessfully")
           navigate("/")

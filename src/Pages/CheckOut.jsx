@@ -1,15 +1,17 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { Input } from '../index'
 import { useCart } from '../Context/CartContext';
-import { serverTimestamp } from 'firebase/firestore';
+import { serverTimestamp, setDoc } from 'firebase/firestore';
 import { useForm } from 'react-hook-form';
 import configservice from '../Firebase/Config-services';
 import { Icon } from '@iconify/react';
-import authservice from '../Firebase/Auth-services';
 import { CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
 import { toast } from 'sonner';
 import { sendOrderEmail } from '../Components/Email Services/emailService';
+import { database } from '../lib/fireBaseConfig';
+import { doc, getDoc } from "firebase/firestore";
+import authservice from '../Firebase/Auth-services';
 
 function CheckOut() {
 
@@ -21,29 +23,137 @@ function CheckOut() {
 
     // ------------------------------------------------------------------------------------------------
 
-    const { cartItems, clearCart } = useCart()
-    const { register, handleSubmit, formState: { errors } } = useForm()
+    const { cartItems, currentUser, clearCart } = useCart()
+    const { register, handleSubmit, setValue, formState: { errors } } = useForm()
     const [error, setError] = useState(null);
     const [loading, setLoading] = useState(false);
     const [selectedMethod, setSelectedMethod] = useState('card'); // select shipping method
+    const [dbCartItems, setDbCartItems] = useState([]);
     const navigate = useNavigate();
+    const [isSaveProfileChecked, setIsSaveProfileChecked] = useState(false);
+    const [checkboxError, setCheckboxError] = useState("");
+
+
+    // when user login get user seleted items from database --------------------------------------------------------------------------
+
+    useEffect(() => {
+        (async () => {
+            setLoading(true)
+
+            if (currentUser && currentUser.uid) {
+                try {
+
+                    const docRef = doc(database, "carts", currentUser.uid);
+                    const docSnap = await getDoc(docRef);
+
+                    if (docSnap.exists()) {
+                        const data = docSnap.data();
+                        setDbCartItems(data.items || []);
+                    } else {
+                        setDbCartItems([]);
+                    }
+                } catch (error) {
+
+                    console.error("Firestore Read Error:", error);
+                } finally {
+                    setLoading(false)
+                }
+            }
+        })()
+    }, [currentUser])
+
+
+
+
+    // when user go to checkout page the form is automattically filled
+    // --------------------------------------------------------------------------------------------------------------
+    useEffect(() => {
+        (async () => {
+            setLoading(true);
+
+            if (!currentUser?.uid) {
+                setLoading(false);
+                return;
+            }
+            try {
+                const userRef = doc(database, "users", currentUser.uid);
+                const userSnap = await getDoc(userRef);
+
+                const fullName = currentUser.displayName || "";
+                const nameParts = fullName.trim().split(/\s+/);
+                const authFirstName = nameParts[0] || "";
+                const authLastName = nameParts.slice(1).join(" ") || "";
+
+                let finalData = {
+                    firstName: authFirstName,
+                    lastName: authLastName,
+                    country: 'Pakistan',
+                    address: '',
+                    city: '',
+                    postalCode: '',
+                    phone: ''
+                };
+
+                if (userSnap.exists()) {
+                    const firebaseData = userSnap.data();
+                    const savedShipping = firebaseData.shippingAddress || {};
+
+                    finalData = {
+                        firstName: savedShipping.firstName || savedShipping.firstname || firebaseData.firstname || authFirstName || '',
+                        lastName: savedShipping.lastName || firebaseData.lastname || authLastName || '',
+                        country: savedShipping.country || 'Pakistan',
+                        address: savedShipping.address || '',
+                        city: savedShipping.city || '',
+                        postalCode: savedShipping.postalCode || '',
+                        phone: savedShipping.phoneNumber || savedShipping.phone || ''
+                    };
+                }
+
+
+                //  FIXED: React Hook Form ko batana ke inputs fill ho chuki hain
+                Object.keys(finalData).forEach(key => {
+                    setValue(key, finalData[key]);
+                });
+
+            } catch (error) {
+                console.error("Checkout auto-fill profile error:", error);
+            } finally {
+                setLoading(false);
+            }
+        })();
+    }, [currentUser?.uid, currentUser?.displayName, setValue]);
+
+
+
+    // --------------------------------------------------------------------------------------------------------------
 
     const submit = async (formData) => {
 
-        const currentUser = await authservice.getCurrentUser()
+        const getUser = await authservice.getCurrentUser();   // check user fresh status login or logout 
 
         if (cartItems.length === 0) {
-            alert('Your cart is empty')
+            toast.alert('Your cart is empty')
             return
         }
+
+        if (isSaveProfileChecked && !getUser) {
+            setCheckboxError("Please Signup / Login first to save your address in profile! 🔐");
+            toast.error("Please uncheck the save info box or Login to proceed!");
+            setLoading(false);
+            return;
+        }
+
         try {
             setLoading(true);
             setError(null);
 
+            const isGuestUser = !getUser;
+
             const orderData = {
                 customerInfo: formData,
-                orderItems: cartItems,
-                userId: currentUser ? currentUser.uid : 'guest-user',
+                orderItems: (getUser && dbCartItems.length > 0) ? dbCartItems : cartItems,
+                userId: getUser ? getUser.uid : 'guest-user',
+                userType: isGuestUser ? 'Guest' : 'Registered',
                 paymentMethod: selectedMethod === "cod" ? "Cash on delivery" : "PrePaid(pending)",
                 shippingFee: Number(shippingFee),
                 totalPrice: Number(totalPrice),
@@ -52,22 +162,27 @@ function CheckOut() {
 
             }
 
+            // when checked the box then save the form data in database users doc
+            if (isSaveProfileChecked && getUser) {
+                const userDocRef = doc(database, "users", getUser.uid);
+
+                const userProfilePayload = {
+                    shippingAddress: {
+                        firstname: formData.firstName || '',
+                        lastname: formData.lastName || '',
+                        country: formData.country || 'Pakistan',
+                        address: formData.address ? formData.address.trim() : '',
+                        city: formData.city || '',
+                        postalCode: formData.postalCode || '',
+                        phoneNumber: formData.phone || '',
+                        updatedAt: new Date().toISOString()
+                    }
+                };
+                await setDoc(userDocRef, userProfilePayload, { merge: true });
+            }
+
             let orderId = null;
             let finalOrderData = null;
-
-            // if (selectedMethod === "cod") {
-            //     const orderId = await configservice.saveOrderToDB(orderData)
-
-            //     if (orderId) {
-
-            //         clearCart()    // Empty cart when order is successfull
-            //         toast.success("Order Placed via COD!");
-            //         navigate('/order-success', {
-            //             state: { orderId: orderId },
-            //             replace: true // Taake user back button daba kar wapis checkout par na aa sakay
-            //         });
-            //         console.log(orderId)
-            //     }
 
             if (selectedMethod === "cod") {
                 finalOrderData = {
@@ -102,14 +217,6 @@ function CheckOut() {
                     toast.error(error.message);
                     setLoading(false);
 
-                    // } else {
-                    //     const stripeOrderData = {
-                    //         ...orderData,
-                    //         paymentMethod: "Card (Stripe)",
-                    //         paymentStatus: "Pending Verification", // Testing ke liye 'Paid' ya 'Pending Verification'
-                    //         stripePaymentId: stripeMethod.id, // Ye ID record ke liye zaroori hai
-                    //     };
-
                 } else {
                     finalOrderData = {
                         ...orderData,
@@ -121,11 +228,6 @@ function CheckOut() {
                 }
             }
 
-
-
-
-            // 4. Firebase mein save karein
-            // const orderId = await configservice.saveOrderToDB(stripeOrderData);
 
             if (orderId) {
                 sendOrderEmail(finalOrderData, orderId);
@@ -232,28 +334,25 @@ function CheckOut() {
                         {errors.country && <p className='text-red-600 mt-8 text-center'>{errors.country.message}</p>}
 
                         <div className='flex gap-2'>
+                            <div className="w-full">
+                                <Input
+                                    placeholder="First Name"
+                                    type="text"
+                                    className="placeholder:text-[13px] -mt-11 "
+                                    {...register("firstName", { required: true })}
+                                />
+                                {errors.firstName && <p className='text-red-600 mt-2 text-sm text-left pl-2'>{errors.firstName.message}</p>}
+                            </div>
 
-                            <Input
-                                placeholder="First Name"
-                                type="text"
-                                className="placeholder:text-[13px] -mt-11 "
-                                {...register("firstName", { required: true })}
-                            />
-
-                            {errors.firstName && <p className='text-red-600 mt-8 text-center'>{errors.firstName.message}</p>}
-
-
-                            <Input
-                                placeholder="Last Name"
-                                type="text"
-                                className="placeholder:text-[13px] -mt-11"
-                                {...register("lastName", { required: true })}
-
-                            />
-
-                            {errors.lastName && <p className='text-red-600 mt-8 text-center'>{errors.lastName.message}</p>}
-
-
+                            <div className="w-full">
+                                <Input
+                                    placeholder="Last Name"
+                                    type="text"
+                                    className="placeholder:text-[13px] -mt-11"
+                                    {...register("lastName", { required: true })}
+                                />
+                                {errors.lastName && <p className='text-red-600 mt-2 text-sm text-left pl-2'>{errors.lastName.message}</p>}
+                            </div>
                         </div>
 
                         <Input
@@ -266,29 +365,27 @@ function CheckOut() {
 
                         {errors.address && <p className='text-red-600 mt-8 text-center'>{errors.address.message}</p>}
 
-
                         <div className='flex gap-2'>
+                            <div className="w-full">
+                                <Input
+                                    placeholder="City"
+                                    type="text"
+                                    className="placeholder:text-[13px] -mt-11 "
+                                    {...register("city", { required: true })}
+                                />
+                                {errors.city && <p className='text-red-600 mt-2 text-sm text-left pl-2'>{errors.city.message}</p>}
+                            </div>
 
-                            <Input
-                                placeholder="City"
-                                type="text"
-                                className="placeholder:text-[13px] -mt-11 "
-                                {...register("city", { required: true })}
-                            />
-
-                            {errors.city && <p className='text-red-600 mt-8 text-center'>{errors.city.message}</p>}
-
-                            <Input
-                                placeholder="Postal Code (optional)"
-                                type="number"
-                                style={{ appearance: 'textfield', MozAppearance: 'textfield' }}
-                                className="placeholder:text-[13px] -mt-11 [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
-                                {...register("postalCode", { required: false })}
-                            />
-
-                            {errors.postalCode && <p className='text-red-600 mt-8 text-center'>{errors.postalCode.message}</p>}
-
-
+                            <div className="w-full">
+                                <Input
+                                    placeholder="Postal Code (optional)"
+                                    type="number"
+                                    style={{ appearance: 'textfield', MozAppearance: 'textfield' }}
+                                    className="placeholder:text-[13px] -mt-11 [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+                                    {...register("postalCode", { required: false })}
+                                />
+                                {errors.postalCode && <p className='text-red-600 mt-2 text-sm text-left pl-2'>{errors.postalCode.message}</p>}
+                            </div>
                         </div>
 
                         <Input
@@ -298,10 +395,45 @@ function CheckOut() {
                             style={{ appearance: 'textfield', MozAppearance: 'textfield' }}
                             className="placeholder:text-[13px] -mt-11 [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
                             {...register("phone", { required: true })}
-
                         />
 
                         {errors.phone && <p className='text-red-600 mt-8 text-center'>{errors.phone.message}</p>}
+
+
+                        {/* 🎯 HIGHLIGHTED: NEW CHECKBOX INJECTED HERE */}
+                        <div className="flex items-center gap-3 py-4 border-t border-slate-100  pl-1">
+                            <input
+                                type="checkbox"
+                                id="saveToProfile"
+                                checked={isSaveProfileChecked}
+                                onChange={async (e) => {
+
+                                    const isChecked = e.target.checked;
+                                    setIsSaveProfileChecked(isChecked);
+                                    const getUser = await authservice.getCurrentUser();
+
+                                    if (isChecked && !getUser) {
+                                        setCheckboxError("Please Signup / Login first to save your address in profile! 🔐");
+                                        return;
+                                    } else {
+                                        // Agar logged in hai to state update karo
+                                        setCheckboxError('');
+                                    }
+                                }}
+                                className="w-4 h-4 text-slate-900 border-slate-300 rounded focus:ring-slate-900 cursor-pointer accent-slate-900"
+                            />
+                            <label
+                                htmlFor="saveToProfile"
+                                className="text-xs font-medium text-slate-600 cursor-pointer select-none tracking-wide"
+                            >
+                                Save this information for next time
+                            </label>
+                            {checkboxError && (
+                                <p className="text-red-600 text-xs font-medium mt-2 pl-7 animate-in fade-in duration-200">
+                                    {checkboxError}
+                                </p>
+                            )}
+                        </div>
 
                     </div>
 
@@ -457,11 +589,6 @@ function CheckOut() {
                         })}
 
                         <div className='pt-9 flex flex-col gap-1 '>
-                            {/* <div className="">
-                                <p className="text-[11px] text-gray-500 text-center mb-4 uppercase tracking-widest">
-                                    Shipping & taxes free
-                                </p>
-                            </div> */}
 
                             {/* SubTotal */}
                             <div className="flex justify-between items-center ">

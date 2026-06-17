@@ -184,6 +184,23 @@ export class ConfigServices {
         }
     }
 
+
+    async transferCartItemToBackend(newUser, localCartItems) {
+        if (!localCartItems || localCartItems.length === 0) return;
+
+        try {
+            let cartRef = doc(database, 'carts', newUser.uid);
+
+            await setDoc(cartRef, {
+                items: localCartItems,
+                userId: newUser.uid,
+                lastUpdated: serverTimestamp()
+            })
+        } catch (error) {
+            console.error("transferCartItemToBackend Error:", error);
+        }
+    }
+
 }
 
 const configservice = new ConfigServices()

@@ -17,12 +17,11 @@ import SearchPage from './Pages/SearchPage.jsx';
 import ProductDetailView from './Pages/ProductDetailView.jsx';
 import CheckOut from './Pages/CheckOut.jsx'
 import OrderSuccess from './Pages/OrderSuccess.jsx';
+import Account from './Components/Account/Account.jsx';
 
 import { loadStripe } from '@stripe/stripe-js';
 import { Elements } from '@stripe/react-stripe-js';
 import { firebaseConfig } from '../src/lib/fireBaseConfig.js'
-
-
 
 
 const stripePromise = loadStripe(firebaseConfig.stripePublicKey);
@@ -99,6 +98,11 @@ let router = createBrowserRouter([
       {
         path: "/order-success",
         element: <OrderSuccess />
+      },
+
+      {
+        path: "/account",
+        element: <Account />
       },
 
 
