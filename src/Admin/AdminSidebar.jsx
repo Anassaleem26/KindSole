@@ -1,90 +1,104 @@
-import React from 'react'
-import { Link } from 'react-router-dom'
-import { Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/react'
-// Iconify import karein
+import React, { useState } from 'react'
+import { Link, useLocation } from 'react-router-dom'
 import { Icon } from '@iconify/react'
 
 const AdminSidebar = () => {
+    const location = useLocation();
+
+    const [isEcommerceOpen, setIsEcommerceOpen] = useState(
+        location.pathname.startsWith('/admin-dashboard/products') ||
+        location.pathname.startsWith('/admin-dashboard/add-products')
+    );
+
     return (
-        <div className="w-[290px] min-w-[290px] border-r border-gray-200 h-screen overflow-y-auto bg-white flex flex-col ">
+        <div className="w-[290px] min-w-[290px] border-r border-gray-200 h-screen overflow-y-auto bg-white flex flex-col">
 
-            <div className="p-5 sticky top-0 z-10 bg-white ">
-
-                <Link
-                    to="/admin-dashboard"
-                    className="flex items-center justify-center  ">
+            {/* Logo Section */}
+            <div className="p-5 sticky top-0 z-10 bg-white">
+                <Link to="/admin-dashboard" className="flex items-center justify-center">
                     <img
                         src="/src/assets/logo/Logo TR.png"
                         alt="Kindsole Logo"
-                        className="h-8 w-auto object-contain" />
+                        className="h-8 w-auto object-contain"
+                    />
                 </Link>
-
             </div>
 
-            <div className='px-8 '>
-                <div className='pt-6 uppercase opacity-40 text-[13px]'>
+
+            {/* Menu Items */}
+            <div className='px-8'>
+
+                <div className='pt-6 uppercase opacity-40 text-[13px] font-bold tracking-wider'>
                     Menu
                 </div>
 
 
-                <div className='pt-6 w-full'>
-                    <Menu as="div" className="relative">
-                        {({ open }) => (
-                            <>
-                                <MenuButton className="inline-flex w-full items-center justify-center gap-x-2 rounded-md  px-4 py-2 text-sm font-semibold text-gray-900 hover:bg-gray-100 border-none">
-                                    E-Commerce
+                <div className='pt-4 w-full'>
 
-                                    <Icon
-                                        icon="heroicons:chevron-down-20-solid"
-                                        className={`size-5 text-gray-400  transition-transform duration-200 ${open ? 'rotate-0' : ' rotate-180'
-                                            }`}
-                                    />
-                                </MenuButton>
+                    {/* E-Commerce Header Button */}
+                    <button
+                        onClick={() => setIsEcommerceOpen(!isEcommerceOpen)}
+                        className="flex w-full items-center justify-between rounded-md px-4 py-2.5 text-sm font-semibold text-gray-900 hover:bg-gray-100 border-none transition-all"
+                    >
+                        <div className="flex items-center gap-2">
+                            <Icon icon="lucide:shopping-bag" className="size-4 text-gray-500" />
+                            <span>E-Commerce</span>
+                        </div>
 
-
-
-                                <MenuItems
-                                    transition
-                                    className="absolute right-0 z-10 mt-2 w-56 origin-top-right rounded-md  transition focus:outline-none data-[closed]:scale-95 data-[closed]:transform data-[closed]:opacity-0 data-[enter]:duration-100 data-[enter]:ease-out data-[leave]:duration-75 data-[leave]:ease-in"
-                                >
-                                    <div className="py-1">
-
-                                        <MenuItem>
-                                            {({ focus }) => (
-                                                <a
-                                                    href="/admin-dashboard/products"
-                                                    className={`flex items-center gap-2 px-4 py-2 text-sm rounded-md ${focus ? 'bg-gray-100 text-gray-900' : 'text-gray-700'
-                                                        }`}
-                                                >
-                                                    <Icon icon="icon-park-outline:ad-product" className="size-4" />
-                                                    Products
-                                                </a>
-                                            )}
-                                        </MenuItem>
-
-                                        <MenuItem>
-                                            {({ focus }) => (
-                                                <Link to="/admin-dashboard/add-products"
-                                                    className={`flex items-center gap-2 px-4 py-2 text-sm rounded-md ${focus ? 'bg-gray-100 text-gray-900' : 'text-gray-700'
-                                                        }`}>
-                                                    <Icon icon="mdi:cart" className="size-4" />
-                                                    Add Product
-                                                </Link>
-
-                                            )}
-                                        </MenuItem>
+                        <Icon
+                            icon="heroicons:chevron-down-20-solid"
+                            className={`size-5 text-gray-400 transition-transform duration-200 ${isEcommerceOpen ? 'rotate-180' : 'rotate-0'
+                                }`}
+                        />
+                    </button>
 
 
-                                    </div>
-                                </MenuItems>
-                            </>
-                        )}
-                    </Menu>
+                    <div className={`mt-1 pl-4 space-y-1 transition-all duration-200 overflow-hidden ${isEcommerceOpen ? 'max-h-40 opacity-100' : 'max-h-0 opacity-0'
+                        }`}>
+
+                        {/* AllProducts  */}
+                        <Link
+                            to="/admin-dashboard/products"
+                            className={`flex items-center gap-2 px-4 py-2 text-sm rounded-md 
+                                ${location.pathname === '/admin-dashboard/products' ?
+                                    'bg-gray-200 text-gray-900' :
+                                    'text-gray-700'
+                                }`}
+                        >
+                            <Icon icon="icon-park-outline:ad-product" className="size-4" />
+                            <span>Products</span>
+                        </Link>
+
+
+                        {/* Add Product  */}
+                        <Link
+                            to="/admin-dashboard/add-products"
+                            className={`flex items-center gap-2 px-4 py-2 text-sm rounded-md 
+                                ${location.pathname === '/admin-dashboard/add-products'
+                                    ? 'bg-gray-200 text-gray-900'
+                                    : 'text-gray-700'}`}
+                        >
+                            <Icon icon="mdi:cart" className="size-4" />
+                            <span>Add Product</span>
+                        </Link>
+
+                    </div>
                 </div>
             </div>
-
         </div>
     )
 }
 
 export default AdminSidebar
+
+
+
+
+
+
+
+
+
+
+
+

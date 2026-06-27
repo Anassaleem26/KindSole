@@ -6,7 +6,7 @@ import Home from './Pages/Home.jsx';
 // import Admin from './Pages/Admin.jsx';
 import AddProduct from './Admin/AdminPage.jsx/AddProduct.jsx';
 import AdminDashboard from './Admin/AdminPage.jsx/AdminDashboard.jsx';
-import AllProducts from './Admin/AllProducts.jsx';
+import AllProducts from './Admin/Products handle/AllProducts.jsx';
 import EditProduct from './Admin/AdminPage.jsx/EditProduct.jsx';
 import MenSectionPage from './Pages/MenSectionPage.jsx';
 import WomenSectionPage from './Pages/WomenSectionPage.jsx';
@@ -20,6 +20,10 @@ import OrderSuccess from './Pages/OrderSuccess.jsx';
 import Account from './Components/Account/Account.jsx';
 import HelpPage from './Pages/HelpPage.jsx';
 import AboutPage from './Pages/AboutPage.jsx';
+import SalesAnalytics from './Admin/AdminPage.jsx/SalesAnalytics.jsx';
+
+
+
 
 import { loadStripe } from '@stripe/stripe-js';
 import { Elements } from '@stripe/react-stripe-js';
@@ -127,7 +131,7 @@ let router = createBrowserRouter([
     element: <AdminLayout />,
     children: [
       {
-        path: "/admin-dashboard",
+        index: true,
         element: <AdminDashboard />
       },
       {
@@ -139,9 +143,13 @@ let router = createBrowserRouter([
         element: <AllProducts />
       },
       {
-        path: "EditProduct/:id",
+        path: "edit-product/:id",
         element: <EditProduct />
       },
+      {
+      path: "sales-analytics",
+      element: <SalesAnalytics /> 
+    }
     ]
   },
 

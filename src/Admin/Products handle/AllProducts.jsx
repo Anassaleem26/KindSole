@@ -2,8 +2,8 @@
 // import React, { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Icon } from '@iconify/react'
-import Input from '../Components/ui/Input'
-import configservice from '../Firebase/Config-services'
+import Input from '../../Components/ui/Input'
+import configservice from '../../Firebase/Config-services'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 
@@ -209,7 +209,15 @@ function AllProducts() {
                                         {/* Action Buttons */}
                                         <td className="px-4 py-4 text-right">
                                             <div className="flex items-center justify-end gap-1">
-                                                <Link to={`/admin-dashboard/EditProduct/${product.id}`}>
+                                                <Link
+                                                    to={`/admin-dashboard/edit-product/${product.id}`}
+                                                    state={{
+                                                        product: {
+                                                            productId: product.id, 
+                                                            ...product
+                                                        }
+                                                    }}
+                                                >
                                                     <button className="p-2 hover:bg-blue-50 text-blue-600 rounded-full transition-colors" title="Edit">
                                                         <Icon icon="mdi:pencil-outline" className="w-5 h-5" />
                                                     </button>

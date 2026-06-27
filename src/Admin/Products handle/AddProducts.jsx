@@ -1,9 +1,9 @@
 import React, { useState } from 'react'
-import Input from '../Components/ui/Input'
+import Input from '../../Components/ui/Input'
 import { useNavigate } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
-import configservice from '../Firebase/Config-services'
-import storageservice from '../Firebase/Storage-services'
+import configservice from '../../Firebase/Config-services'
+import storageservice from '../../Firebase/Storage-services'
 import { toast } from 'sonner'
 
 function AddProduct({ product }) {
@@ -21,8 +21,12 @@ function AddProduct({ product }) {
     const [error, setError] = useState(null)
 
 
-    const [variants, setVariants] = useState(product?.variants || [{ color: '', imageFile: null, existingUrl: '' }]);
-
+const [variants, setVariants] = useState(
+        product?.variants 
+            ? product.variants.map(v => ({ color: v.color || '', imageFile: null, existingUrl: v.imageUrl || '' }))
+            : [{ color: '', imageFile: null, existingUrl: '' }]
+    );
+    
     const addVariantRow = () => {
         setVariants([...variants, { color: '', imageFile: null, existingUrl: '' }]);
     };
@@ -208,7 +212,7 @@ function AddProduct({ product }) {
                                         
                                         <div className="flex-1 flex items-center gap-2">
                                             <label className="cursor-pointer bg-white border px-2 py-1 text-xs rounded hover:bg-gray-100 text-black">
-                                                {v.imageFile ? "Image Selected" : (v.existingUrl ? "Change Image" : "Upload Image")}
+                                                {v.imageFile ? "Image Selected" : (v.existingUrl || v.imageUrl ? "Change Image" : "Upload Image")}
                                                 <input
                                                     type="file"
                                                     className="hidden"
@@ -218,9 +222,9 @@ function AddProduct({ product }) {
                                                 {errors.file?.message && <p className="text-red-600 mt-8 text-center"> {errors.file.message} </p>}
                                             </label>
 
-                                            {(v.imageFile || v.existingUrl) && (
+                                           {(v.imageFile || v.existingUrl || v.imageUrl) && (
                                                 <img
-                                                    src={v.imageFile ? URL.createObjectURL(v.imageFile) : v.existingUrl}
+                                                    src={v.imageFile ? URL.createObjectURL(v.imageFile) : (v.existingUrl || v.imageUrl)}
                                                     className="w-8 h-8 rounded object-cover"
                                                 />
                                             )}

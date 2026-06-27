@@ -1,5 +1,5 @@
 import React from 'react'
-import AllProducts from '../AllProducts'
+import AllProducts from '../Products handle/AllProducts'
 
 function Products() {
   return (
